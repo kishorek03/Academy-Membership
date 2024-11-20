@@ -1,9 +1,9 @@
 package com.Academy.dto;
 
+import com.Academy.common.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -31,6 +31,8 @@ public class UserDTO {
     @NotBlank(message = "Mobile number is required")
     @Pattern(regexp = "^\\d{10}$", message = "Mobile number should be exactly 10 digits")
     private String mobile;
+
+    private UserType userType;
 
     private List<ChildrenDTO> children;
 

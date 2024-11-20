@@ -1,5 +1,6 @@
 package com.Academy.model;
 
+import com.Academy.common.UserType;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -22,13 +23,16 @@ public class User {
     private String password;
     private String mobile;
 
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Children> children = new ArrayList<>();
 
     public void addChild(Children child) {
-        child.setUser(this);  // Set the user reference in each child
-        this.children.add(child);  // Add child to the list
+        child.setUser(this);
+        this.children.add(child);
     }
 
     @Entity

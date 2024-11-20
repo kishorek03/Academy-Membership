@@ -1,18 +1,41 @@
 package com.Academy.service;
 
+import com.Academy.common.LoginMessage;
+import com.Academy.dto.LoginDTO;
 import com.Academy.dto.UserDTO;
 import com.Academy.model.User;
 import com.Academy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 public class UserService {
-
     @Autowired
     private UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    // Method to check if an email already exists
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public User registerUser(UserDTO userDTO) {
+        // Check if email already exists
+        if (emailExists(userDTO.getEmail())) {
+            throw new IllegalArgumentException("User with this email already exists");
+        }
+
+        // Proceed with registration if the email does not exist
+        User user = convertToEntity(userDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return userRepository.save(user);
+    }
 
     public User convertToEntity(UserDTO userDTO) {
         User user = new User();
@@ -21,6 +44,7 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setPassword(userDTO.getPassword());
         user.setMobile(userDTO.getMobile());
+        user.setUserType(userDTO.getUserType());
 
         List<User.Children> children = userDTO.getChildren().stream().map(childDTO -> {
             User.Children child = new User.Children();
@@ -35,21 +59,14 @@ public class UserService {
         return user;
     }
 
-    public User registerUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()) != null) {
-            throw new IllegalArgumentException("User with this email already exists");
-        }
-        return userRepository.save(user);
-    }
-
     public UserDTO toUserDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
         dto.setMobile(user.getMobile());
+        dto.setUserType(user.getUserType());
 
         List<UserDTO.ChildrenDTO> childrenDTOList = user.getChildren().stream().map(child -> {
             UserDTO.ChildrenDTO childDto = new UserDTO.ChildrenDTO();
@@ -63,7 +80,30 @@ public class UserService {
         dto.setChildren(childrenDTOList);
         return dto;
     }
+
     public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
+
+    public ResponseEntity<LoginMessage> loginUser(LoginDTO loginDTO) {
+        // Fetch the user by email
+        User user = userRepository.findByEmail(loginDTO.getEmail()).orElse(null);
+
+        if (user == null) {
+            // Email doesn't exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new LoginMessage("Email not found", false));
+        }
+
+        // Validate password
+        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            // Password doesn't match
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginMessage("Invalid email or password", false));
+        }
+
+        // Success
+        return ResponseEntity.ok(new LoginMessage("Login successful", true));
+    }
+
 }
