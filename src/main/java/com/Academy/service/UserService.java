@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Service
 public class UserService {
     @Autowired
@@ -104,10 +105,11 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new LoginMessage("Invalid email or password", false));
         }
-        String token = jwtUtil.generateToken(user.getEmail());
+
+        // Generate token with username and email
+        String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
 
         // Success
-        return ResponseEntity.ok(new LoginMessage("Login successful", true,token));
+        return ResponseEntity.ok(new LoginMessage("Login successful", true, token));
     }
-
 }
