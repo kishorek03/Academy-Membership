@@ -4,6 +4,7 @@ import com.Academy.common.LoginMessage;
 import com.Academy.dto.LoginDTO;
 import com.Academy.dto.UserDTO;
 import com.Academy.model.User;
+import com.Academy.common.JwtUtil;
 import com.Academy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // Method to check if an email already exists
@@ -101,9 +104,10 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new LoginMessage("Invalid email or password", false));
         }
+        String token = jwtUtil.generateToken(user.getEmail());
 
         // Success
-        return ResponseEntity.ok(new LoginMessage("Login successful", true));
+        return ResponseEntity.ok(new LoginMessage("Login successful", true,token));
     }
 
 }

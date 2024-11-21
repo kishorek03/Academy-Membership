@@ -21,10 +21,10 @@ public class LoginController {
         LoginMessage loginMessage = userService.loginUser(loginDTO).getBody();
 
         // Return the LoginMessage object as part of the ResponseEntity body
+        assert loginMessage != null;
         if (loginMessage.isSuccess()) {
-            return ResponseEntity.ok(loginMessage);  // Return 200 OK with the success message
+            return ResponseEntity.ok(loginMessage);
         } else {
-            // Return BAD_REQUEST status with the error message from the service
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(loginMessage);
         }
     }
