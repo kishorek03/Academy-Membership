@@ -238,8 +238,12 @@ Sample Log Output:
 
 ---
 
-## Contributors
+## Contribution
+Contributions are welcome! Please fork this repository and submit a pull request for any improvements.
 
-- **Kishore**
+## License
+This project is licensed under the MIT License.
 
+---
 
+Thank you for exploring the User Registration and Login Application frontend repository! If you have any questions or feedback, feel free to reach out.
