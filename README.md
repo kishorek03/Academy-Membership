@@ -246,4 +246,4 @@ This project is licensed under the MIT License.
 
 ---
 
-Thank you for exploring the User Registration and Login Application frontend repository! If you have any questions or feedback, feel free to reach out.
+Thank you for exploring the repository! If you have any questions or feedback, feel free to reach out.
