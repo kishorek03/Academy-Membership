@@ -230,14 +230,6 @@ Sample Log Output:
 
 ---
 
-## How to Run
-Clone the repository.
-Configure MySQL and Redis on your local system.
-Update the application-local.properties file with your database credentials.
-Build and run the application using:
-      mvn spring-boot:run
-Validate APIs using Postman or connect to the frontend.
-
 ## Future Enhancements
 
 - Implement role-based access control (RBAC).
