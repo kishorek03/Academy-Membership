@@ -30,4 +30,11 @@ public class EmailService {
             throw new RuntimeException("Failed to send OTP email");
         }
     }
+    public void sendEmail(String to, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(content);
+        mailSender.send(message);
+    }
 }

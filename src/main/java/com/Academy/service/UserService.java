@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
+
 
 @Service
 public class UserService {
@@ -37,6 +39,8 @@ public class UserService {
         // Proceed with registration if the email does not exist
         User user = convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setResetToken(null); // Ensure resetToken is null on registration
+
 
         return userRepository.save(user);
     }
@@ -111,5 +115,26 @@ public class UserService {
 
         // Success
         return ResponseEntity.ok(new LoginMessage("Login successful", true, token));
+    }
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User findByResetToken(String token) {
+        return userRepository.findByResetToken(token);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    public String generateResetToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    public void updatePassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        userRepository.save(user);
     }
 }

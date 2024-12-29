@@ -90,7 +90,7 @@ public class RegistrationController {
     @PostMapping("/verify-otp")
     public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
-        String otp = requestBody.get("otp");
+        String otp = requestBody. get("otp");
         logger.info("Received OTP verification request for email: {}", email);
         if (otpService.validateOtp(email, otp)) {
             otpService.clearOtp(email);

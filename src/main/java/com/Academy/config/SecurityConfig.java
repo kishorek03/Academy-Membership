@@ -29,4 +29,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // Apply CORS configuration to all paths
         return source;
     }
+
 }

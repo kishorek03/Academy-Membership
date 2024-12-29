@@ -23,6 +23,11 @@ public class User {
     private String password;
     private String mobile;
 
+    @Column(name = "reset_token")
+    private String resetToken;
+    private String profilePicture;
+
+
     @Enumerated(EnumType.STRING)
     private UserType userType;
 
