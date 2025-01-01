@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ public class DashboardService {
         userDTO.setEmail(user.getEmail());
         userDTO.setMobile(user.getMobile());
         userDTO.setUserType(user.getUserType());
-        // Add any additional data you need to include in the DTO
+        userDTO.setProfilePictureUrl(user.getProfilePictureUrl()); // Include profile picture URL
         return userDTO;
     }
 
@@ -46,20 +47,44 @@ public class DashboardService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            // Save the file (you can implement custom logic to save the file in your desired location)
-            String fileName = file.getOriginalFilename();
-            String filePath = "/path/to/save/" + fileName;
+            // Ensure the file is not empty
+            if (file.isEmpty()) {
+                throw new RuntimeException("File is empty");
+            }
 
-            // Assuming you save the file at a specified path
-            file.transferTo(new java.io.File(filePath));
+            // Generate a unique file name and save to a specified path
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String filePath = "uploads/profile_pictures/" + fileName;
 
-            // Save the file path to user profile (you can add a field for profilePicture in the User entity)
-            user.setProfilePicture(filePath); // Assuming you have a setProfilePicture method in User class
+            File destinationFile = new File(filePath);
+            // Create directories if they don't exist
+            destinationFile.getParentFile().mkdirs();
+
+            // Save the file
+            file.transferTo(destinationFile);
+
+            // Update the user's profile picture URL in the database
+            user.setProfilePictureUrl(filePath);
             userRepository.save(user);
 
-            return "Profile picture uploaded successfully";
+            return "Profile picture uploaded successfully: " + filePath;
         } else {
             throw new RuntimeException("User not found");
+        }
+    }
+
+    // Update the profile picture URL in the database
+    public void updateUserProfilePicture(Long userId, String profilePictureUrl) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            // Update the profile picture URL
+            user.setProfilePictureUrl(profilePictureUrl);
+            // Save the updated user entity back to the database
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with userId: " + userId);
         }
     }
 }

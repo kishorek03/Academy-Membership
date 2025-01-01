@@ -25,8 +25,7 @@ public class User {
 
     @Column(name = "reset_token")
     private String resetToken;
-    private String profilePicture;
-
+    private String profilePictureUrl;
 
     @Enumerated(EnumType.STRING)
     private UserType userType;
@@ -38,6 +37,10 @@ public class User {
     public void addChild(Children child) {
         child.setUser(this);
         this.children.add(child);
+    }
+
+    public Object getName() {
+        return username;
     }
 
     @Entity

@@ -35,6 +35,11 @@ public class UserDTO {
     private UserType userType;
 
     private List<ChildrenDTO> children;
+    private String profilePictureUrl;
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
 
     @Data
     public static class ChildrenDTO {
