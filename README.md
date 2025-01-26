@@ -47,9 +47,11 @@ The Academy Backend is the server-side implementation of the Academy Membership 
 
 ```json
 {
-  "name": "kishore",
-  "email": "kishore@example.com",
+  "username": "kishore",
+  "email": "kishore@gmail.com",
+  "gender":"male"'
   "mobile": "1234567890",
+  "role":"self",
   "password": "securepassword"
 }
 ```
@@ -74,7 +76,7 @@ The Academy Backend is the server-side implementation of the Academy Membership 
 
 ```json
 {
-  "email": "kishore@example.com"
+  "email": "kishore@gmail.com"
 }
 ```
 
@@ -98,7 +100,7 @@ The Academy Backend is the server-side implementation of the Academy Membership 
 
 ```json
 {
-  "email": "kishore@example.com",
+  "email": "kishore@gmail.com",
   "otp": "123456"
 }
 ```
@@ -123,7 +125,7 @@ The Academy Backend is the server-side implementation of the Academy Membership 
 
 ```json
 {
-  "email": "kishore@example.com",
+  "email": "kishore@gmail.com",
   "password": "securepassword"
 }
 ```
@@ -145,14 +147,14 @@ The Academy Backend is the server-side implementation of the Academy Membership 
 
 - **URL**: `jdbc:mysql://localhost:3306/academy`
 - **Username**: `root`
-- **Password**: `Meera@123`
+- **Password**: `******`
 
 Update the `application.properties` file:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/academy
 spring.datasource.username=root
-spring.datasource.password=Meera@123
+spring.datasource.password=******
 spring.jpa.hibernate.ddl-auto=update
 ```
 
@@ -223,8 +225,8 @@ Logs provide insights into API requests, responses, and errors. Logs can be view
 Sample Log Output:
 
 ```
-2024-12-12T15:17:41.378  INFO 26928 --- [nio-8081-exec-5] c.A.controller.RegistrationController   : OTP generated and sent to kishore@example.com
-2024-12-12T15:18:17.183  INFO 26928 --- [nio-8081-exec-1] c.A.controller.RegistrationController   : OTP verified successfully for email: kishore@example.com
+2024-12-12T15:17:41.378  INFO 26928 --- [nio-8081-exec-5] c.A.controller.RegistrationController   : OTP generated and sent to kishore@gmail.com
+2024-12-12T15:18:17.183  INFO 26928 --- [nio-8081-exec-1] c.A.controller.RegistrationController   : OTP verified successfully for email: kishore@gmail.com
 ```
  - ![backend functionality](./backendfunctionality.png)
 
