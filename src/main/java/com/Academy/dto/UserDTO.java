@@ -4,6 +4,7 @@ import com.Academy.common.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+
 import lombok.Data;
 
 import java.util.List;
@@ -34,12 +35,11 @@ public class UserDTO {
 
     private UserType userType;
 
-    private List<ChildrenDTO> children;
     private String profilePictureUrl;
 
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
-    }
+    private List<ChildrenDTO> children;  // Only applicable for parents
+
+    private PaymentDTO payment;  // Payment should be a separate object
 
     @Data
     public static class ChildrenDTO {
@@ -55,5 +55,13 @@ public class UserDTO {
 
         @NotBlank(message = "Child's gender is required")
         private String gender;
+
+        private PaymentDTO payment;  // Payment details for the child (Player)
+    }
+
+    @Data
+    public static class PaymentDTO {
+        private double amount;
+        private String currency;
     }
 }
