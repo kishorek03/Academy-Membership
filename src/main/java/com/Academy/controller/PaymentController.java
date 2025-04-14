@@ -1,41 +1,47 @@
 package com.Academy.controller;
 
-import com.Academy.dto.PaymentRequest;
+import com.Academy.model.PaymentEntity;
 import com.Academy.service.PaymentService;
-import com.razorpay.RazorpayException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/payments")
-@CrossOrigin(origins = "http://localhost:3000") // Allow frontend requests
+@CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+
     @Autowired
     private PaymentService paymentService;
-
-    // Create a payment order
-    @PostMapping("/create-order")
-    public ResponseEntity<?> createOrder(@RequestBody PaymentRequest request) {
+    @PostMapping("/update")
+    public ResponseEntity<String> verifyPayment(@RequestBody Map<String, Object> payload) {
+        logger.info("Received payment payload: {}", payload);
         try {
-            Map<String, Object> order = paymentService.createOrder(request.getAmount(), request.getCurrency());
-            return ResponseEntity.ok(order);
-        } catch (RazorpayException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-    // Verify payment (called after user completes payment)
-    @PostMapping("/verify-payment")
-    public ResponseEntity<?> verifyPayment(@RequestBody Map<String, String> paymentData) {
-        boolean isValid = paymentService.verifyPayment(paymentData);
-        if (isValid) {
-            return ResponseEntity.ok("Payment Successful!");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payment verification failed!");
+            PaymentEntity payment = new PaymentEntity();
+            payment.setPaymentId((String) payload.get("razorpay_payment_id"));
+            payment.setOrderId((String) payload.get("razorpay_order_id"));
+            payment.setSignature((String) payload.get("razorpay_signature"));
+            payment.setAmount((int) payload.get("amount"));
+            payment.setCurrency((String) payload.get("currency"));
+            payment.setPaidAt(LocalDateTime.now());
+            payment.setStatus("PAID");
+            payment.setUserId((int) payload.getOrDefault("userid", 0));
+            logger.info("Mapped PaymentEntity: {}", payment);
+            paymentService.savePayment(payment);
+            logger.info("Payment saved successfully for paymentId: {}", payment.getPaymentId());
+            return ResponseEntity.ok("Payment verified and saved successfully");
+        } catch (Exception e) {
+            logger.error("Error saving payment: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save payment");
         }
     }
 }

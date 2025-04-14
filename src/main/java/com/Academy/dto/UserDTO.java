@@ -1,11 +1,13 @@
 package com.Academy.dto;
 
-import com.Academy.common.UserType;
+import com.Academy.model.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -35,8 +37,6 @@ public class UserDTO {
 
     private UserType userType;
 
-    private String profilePictureUrl;
-
     private List<ChildrenDTO> children;  // Only applicable for parents
 
     private PaymentDTO payment;  // Payment should be a separate object
@@ -55,10 +55,12 @@ public class UserDTO {
 
         @NotBlank(message = "Child's gender is required")
         private String gender;
+        @Setter
+        @Getter
+        private boolean active = true;
 
         private PaymentDTO payment;  // Payment details for the child (Player)
     }
-
     @Data
     public static class PaymentDTO {
         private double amount;

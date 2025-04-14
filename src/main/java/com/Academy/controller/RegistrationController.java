@@ -67,7 +67,6 @@ public class RegistrationController {
         }
         return ResponseEntity.ok("Email is available.");
     }
-
     @PostMapping("/generate-otp")
     public ResponseEntity<String> generateOtp(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
@@ -86,7 +85,6 @@ public class RegistrationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP.");
         }
     }
-
     @PostMapping("/verify-otp")
     public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
@@ -101,7 +99,6 @@ public class RegistrationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired OTP.");
         }
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         logger.info("Fetching user with ID: {}", id);

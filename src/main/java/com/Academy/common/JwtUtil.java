@@ -14,10 +14,12 @@ public class JwtUtil {
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 10 hours
 
     // Generate token with username and email as claims
-    public String generateToken(String username, String email) {
+    public String generateToken(String username, String email,Long id ,String role) {
         return Jwts.builder()
                 .setSubject(username) // Set username as subject
-                .claim("email", email) // Add email to the claims
+                .claim("email", email)// set email as claims
+                .claim("userId", id)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)

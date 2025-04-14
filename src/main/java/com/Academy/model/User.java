@@ -1,6 +1,5 @@
 package com.Academy.model;
 
-import com.Academy.common.UserType;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,10 +24,12 @@ public class User {
 
     @Column(name = "reset_token")
     private String resetToken;
-    private String profilePictureUrl;
 
     @Enumerated(EnumType.STRING)
     private UserType userType;
+    @Setter
+    @Getter
+    private boolean active=true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -42,6 +43,11 @@ public class User {
     public Object getName() {
         return username;
     }
+
+    public UserType getRole() {
+        return userType;
+    }
+
 
     @Entity
     @Table(name = "children")

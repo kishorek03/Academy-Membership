@@ -1,50 +1,73 @@
 package com.Academy.service;
 
+import com.Academy.common.JwtUtil;
 import com.Academy.common.LoginMessage;
 import com.Academy.dto.LoginDTO;
 import com.Academy.dto.UserDTO;
 import com.Academy.model.User;
-import com.Academy.common.JwtUtil;
 import com.Academy.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.UUID;
 
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private JwtUtil jwtUtil;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // Method to check if an email already exists
-    public boolean emailExists(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(), user.getPassword(), authorities
+        );
+    }
     public User registerUser(UserDTO userDTO) {
-        // Check if email already exists
         if (emailExists(userDTO.getEmail())) {
             throw new IllegalArgumentException("User with this email already exists");
         }
 
-        // Proceed with registration if the email does not exist
         User user = convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setResetToken(null); // Ensure resetToken is null on registration
-
+        user.setResetToken(null);
 
         return userRepository.save(user);
     }
+    public ResponseEntity<LoginMessage> loginUser(LoginDTO loginDTO) {
+        User user = userRepository.findByEmail(loginDTO.getEmail()).orElse(null);
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new LoginMessage("Email not found", false));
+        }
+
+        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginMessage("Invalid email or password", false));
+        }
+
+        String token = jwtUtil.generateToken(user.getUsername(), user.getEmail(),user.getId(),user.getRole().name());
+        return ResponseEntity.ok(new LoginMessage("Login successful", true, token));
+    }
     public User convertToEntity(UserDTO userDTO) {
         User user = new User();
         user.setUsername(userDTO.getUsername());
@@ -66,7 +89,6 @@ public class UserService {
         user.setChildren(children);
         return user;
     }
-
     public UserDTO toUserDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -89,35 +111,31 @@ public class UserService {
         return dto;
     }
 
+    // ✅ 6. Password reset & utility functions
     public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
 
-    public ResponseEntity<LoginMessage> loginUser(LoginDTO loginDTO) {
-        // Fetch the user by email
-        User user = userRepository.findByEmail(loginDTO.getEmail()).orElse(null);
-
-        if (user == null) {
-            // Email doesn't exist
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new LoginMessage("Email not found", false));
-        }
-
-        // Validate password
-        if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-            // Password doesn't match
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginMessage("Invalid email or password", false));
-        }
-
-        // Generate token with username and email
-        String token = jwtUtil.generateToken(user.getUsername(), user.getEmail());
-
-        // Success
-        return ResponseEntity.ok(new LoginMessage("Login successful", true, token));
-    }
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public User updateUser(Long id, User updatedUser) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setUsername(updatedUser.getUsername());
+        user.setEmail(updatedUser.getEmail());
+        user.setMobile(updatedUser.getMobile());
+        user.setGender(updatedUser.getGender());
+        user.setUserType(updatedUser.getUserType());
+        return userRepository.save(user);
     }
 
     public User findByResetToken(String token) {
@@ -137,4 +155,20 @@ public class UserService {
         user.setResetToken(null);
         userRepository.save(user);
     }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public void updateActiveStatus(Long id, boolean active) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setActive(active);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with ID: " + id);
+        }
+    }
+
 }
